@@ -1,0 +1,305 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Factor IT Challenge
+paths:
+    /compras:
+      get:
+        summary: Retorna las compras de un cliente
+        operationId: fetchCompras
+        parameters:
+          - name: document
+            in: header
+            description: DNI del usuario. 
+            schema:
+              type: string
+          - name: from
+            in: query
+            description: parametro desde
+            schema:
+              type: string
+            required: true
+          - name: to
+            in: query
+            description: parametro hasta
+            schema:
+              type: string
+            required: false
+          - name: order
+            in: header
+            description: orden especificado
+            schema:
+              type: string
+            required: true
+        responses:
+          '200':
+            description: 'Compras realizadas del usuario'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/FetchComprasResponse'
+          '400':
+            description: 'Bad request, parameter has invalid values, or request otherwise malformed'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+          '404':
+            description: 'Operation was not found'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+          '500':
+            description: Internal Server Error.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+    /carrito:
+      get:
+        summary: Retorna el estado del carrito de un cliente
+        operationId: fetchCarrito
+        parameters:
+          - name: carritoId
+            in: header
+            description: id del carrito 
+            schema:
+              type: string
+            required: true
+        responses:
+          '200':
+            description: 'Se obtienen las compras realizadas del usuario'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/FetchCarritoResponse'
+          '400':
+            description: 'Bad request, parameter has invalid values, or request otherwise malformed'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+          '404':
+            description: 'Operation was not found'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+          '500':
+            description: Internal Server Error.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+      post:
+        summary: Creacion de un carrito.
+        operationId: createCart
+        parameters:
+          - name: userId
+            in: header
+            description: ID del usuario. 
+            schema:
+              type: string
+          - name: tipo
+            in: header
+            description: tipo de carrito
+            schema:
+              type: string
+        responses:
+          '200':
+            description: 'Se crea un nuevo carrito'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/CreateCarritoResponse'
+          '400':
+            description: 'Bad request, parameter has invalid values, or request otherwise malformed'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+          '404':
+            description: 'Operation was not found'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+          '500':
+            description: Internal Server Error.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+      delete:
+        summary: cancela un carrito
+        operationId: deleteCarrito
+        parameters:
+          - name: carritoId
+            in: header
+            description: ID del carrito. 
+            schema:
+              type: string
+            required: true
+        responses:
+          '200':
+            description: 'Se cancelo la orden de compra'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+          '400':
+            description: 'Bad request, parameter has invalid values, or request otherwise malformed'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+          '404':
+            description: 'Operation was not found'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+          '500':
+            description: Internal Server Error.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+      patch:
+        summary: Actualiza informacion del carrito
+        operationId: updateCarrito
+        parameters:
+          - name: carritoId
+            in: header
+            description: id de carrito. 
+            schema:
+              type: string
+            required: true
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/UpdateCarritoRequest'
+        responses:
+          '200':
+            description: 'Se actualizo el carrito'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/FetchCarritoResponse'
+          '400':
+            description: 'Bad request, parameter has invalid values, or request otherwise malformed'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+          '404':
+            description: 'Operation was not found'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+          '500':
+            description: Internal Server Error.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: "Error code"
+        detail:
+          type: string
+          description: 'Detalle de Error'
+          example: 'No se encuentra el recurso solicitado'
+    Response:
+      type: object
+      properties:
+        result:
+          type: string
+          description: 'Outcome of the operation'
+          enum:
+          - "OK"
+          - "WARN"
+          - "FAILURE"
+        message:
+          type: string
+          description: "A message describing the result of the operation"
+        errors:
+          description: 'List of errors that occurred trying to process the request'
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorResponse'
+    FetchComprasResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Response'
+      properties:
+        carritos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Carrito'
+    FetchCarritoResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Response'
+      properties:
+        carrito:
+          $ref: '#/components/schemas/Carrito'
+    UpdateCarritoRequest:
+      type: object
+      properties:
+        carrito:
+          $ref: '#/components/schemas/Carrito'
+    CreateCarritoResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Response'
+      properties:
+        carrito:
+          $ref: '#/components/schemas/Carrito'
+    Carrito:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "Numero de carrito"
+        fechaCreacion:
+          type: string
+          description: "Fecha de creacion del carrito"
+        estado:
+          type: string
+          description: "Estado de carrito"
+          enum:
+          - "ABIERTO"
+          - "CANCELADO"
+          - "CERRADO"
+        tipo:
+          type: string
+          description: "Tipo de carrito"
+          enum:
+          - "COMUN"
+          - "ESPECIAL"
+        productos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Producto'
+        total:
+          type: string
+          description: "Precio total del carrito"
+    Producto:
+      type: object
+      properties: 
+        nombre: 
+          type: string
+        precioUnitario: 
+          type: string
+        cantidad:
+          type: string
